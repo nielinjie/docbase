@@ -1,8 +1,13 @@
+package xyz.nietongxue.docbase
+
+
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.serialization.json.JsonPrimitive
-import xyz.nietongxue.docbase.BasicDoc
+import kotlinx.serialization.modules.SerializersModule
+import xyz.nietongxue.common.coordinate.OrderedLEPredicate
+import xyz.nietongxue.common.coordinate.ValueBasedPredicate
 
 class DocTest : StringSpec({
     "basic doc" {
@@ -31,6 +36,19 @@ class DocTest : StringSpec({
             BasicDoc(
                 "name", "content",
                 mutableMapOf("a" to JsonPrimitive("b"))
+            ).getHash()
+        )
+    }
+    "depend declare" {
+
+        val doc = BasicDoc(
+            "name", "content",
+            declare = (docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend())
+        )
+        doc.getHash().shouldBe(
+            BasicDoc(
+                "name", "content",
+                declare = (docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend())
             ).getHash()
         )
     }
