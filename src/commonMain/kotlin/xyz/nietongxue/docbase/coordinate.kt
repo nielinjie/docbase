@@ -4,14 +4,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import xyz.nietongxue.common.base.Path
 import xyz.nietongxue.common.coordinate.*
 
 
 interface DocDimension {
     fun simpleStringMatch(
-        opt: String,
-        propertyValue: JsonElement,
-        operated: String
+        opt: String, propertyValue: JsonElement, operated: String
     ) = when (opt) {
         "eq" -> propertyValue.jsonPrimitive.content == operated
         "in" -> propertyValue.jsonPrimitive.content in operated.split(",").map { it.trim() }
@@ -19,10 +18,7 @@ interface DocDimension {
     }
 
     fun orderedStringMatch(
-        opt: String,
-        propertyValue: JsonElement,
-        operated: String,
-        ordered: List<String>
+        opt: String, propertyValue: JsonElement, operated: String, ordered: List<String>
     ) = when (opt) {
         "eq" -> propertyValue.jsonPrimitive.content == operated
         "in" -> propertyValue.jsonPrimitive.content in operated.split(",").map { it.trim() }
@@ -35,8 +31,11 @@ interface DocDimension {
 
     object Area : DocDimension, PathLikeDimension("area") {
         override fun match(propertyValue: JsonElement, opt: String, operated: String): Boolean {
+            val operatedPath = Path.fromString(operated)
+            val propertyPath = Path.fromString(propertyValue.jsonPrimitive.content)
             return when (opt) {
-                "in" -> TODO()
+                "in" -> (propertyPath).isDescendantOf(operatedPath)
+                "inOrEq" -> propertyPath == operatedPath || (propertyPath).isDescendantOf(operatedPath)
                 else -> error("unknown opt")
             }
         }
@@ -49,10 +48,8 @@ interface DocDimension {
         }
 
         override fun value(value: String): Pair<String, JsonElement> {
-            return if (this.categories.contains(value))
-                this.name to JsonPrimitive(value)
-            else
-                error("not a valid category")
+            return if (this.categories.contains(value)) this.name to JsonPrimitive(value)
+            else error("not a valid category")
         }
 
 
@@ -68,24 +65,19 @@ interface DocDimension {
         }
 
         override fun value(value: String): Pair<String, JsonElement> {
-            return if (this.ordered.contains(value))
-                this.name to JsonPrimitive(value)
-            else
-                error("not a valid category")
+            return if (this.ordered.contains(value)) this.name to JsonPrimitive(value)
+            else error("not a valid category")
         }
     }
 
-    object Phase : DocDimension,
-        OrderedDimension("phase", listOf("require", "design", "develop", "test", "release")) {
+    object Phase : DocDimension, OrderedDimension("phase", listOf("require", "design", "develop", "test", "release")) {
         override fun match(propertyValue: JsonElement, opt: String, operated: String): Boolean {
             return orderedStringMatch(opt, propertyValue, operated, ordered)
         }
 
         override fun value(value: String): Pair<String, JsonElement> {
-            return if (this.ordered.contains(value))
-                this.name to JsonPrimitive(value)
-            else
-                error("not a valid category")
+            return if (this.ordered.contains(value)) this.name to JsonPrimitive(value)
+            else error("not a valid category")
         }
     }
 

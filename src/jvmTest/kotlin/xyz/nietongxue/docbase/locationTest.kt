@@ -12,4 +12,5 @@ class LocationTest : StringSpec({
         doc.getHash()
             .shouldBe(BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require"))).getHash())
     }
+
 })

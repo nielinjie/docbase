@@ -12,7 +12,7 @@ class MemoryBase : Base {
     }
 
     fun post(doc: BasicDoc) {
-        if (this.docs.any { it.id() == doc.id() }) error("existed")
+        if (this.docs.any { it.id() == doc.id() }) error("doc is existed, use set to modify")
         docs.add(doc)
     }
 
@@ -22,7 +22,6 @@ class MemoryBase : Base {
         val old = this.docs[index]
         val new = fn(old)
         this.docs[index] = new
-        //replace old with new
     }
 
     fun update(id: Id) {
