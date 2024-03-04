@@ -9,14 +9,14 @@ import kotlinx.serialization.json.Json
 
 class BaseTest : StringSpec({
     "basic" {
-        val base = MemoryBase()
+        val base = SimpleBase()
         base.post(BasicDoc("name", "content"))
         base.select(docSelector(DocDimension.Phase.matcher("le", "require"))).size shouldBe 0
         base.post(BasicDoc("name2", "content", mapOf(DocDimension.Phase.value("require"))))
         base.select(docSelector(DocDimension.Phase.matcher("le", "require"))).size shouldBe 1
     }
     "serialize" {
-        val base = MemoryBase()
+        val base = SimpleBase()
         base.post(BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require"))))
         val json = Json.encodeToString(base.docs)
         json.shouldContainInOrder("phase", "require")
@@ -38,7 +38,7 @@ class BaseTest : StringSpec({
     "select" {
         val doc = BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require")))
         val selector = docSelector(DocDimension.Phase.matcher("le", "require"))
-        val base = MemoryBase()
+        val base = SimpleBase()
         base.post(doc)
         base.select(selector).shouldHaveSize(1).also {
             it.first().id().shouldBe(doc.id())

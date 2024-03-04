@@ -5,10 +5,14 @@ import xyz.nietongxue.common.base.Id
 interface Base
 
 
-class MemoryBase : Base {
+class SimpleBase : Base {
     val docs = mutableListOf<BasicDoc>()
     fun select(selector: DocSelector): List<Doc> {
         return docs.filter { selector.match(it) }
+    }
+
+    fun get(id: Id): BasicDoc {
+        return this.docs.find { it.id() == id } ?: error("not found")
     }
 
     fun post(doc: BasicDoc) {
@@ -35,7 +39,7 @@ class MemoryBase : Base {
 
     fun checkDependOutDated(): List<Doc> {
         return this.docs.filter {
-            !it.checkDependSatisfied(this)
+            it.checkDependSatisfied(this) is DependSatisfied.Unsatisfied
         }
     }
 

@@ -7,7 +7,7 @@ import io.kotest.matchers.shouldBe
 class DependTest : StringSpec({
 
     "check dep" {
-        val base = MemoryBase()
+        val base = SimpleBase()
         base.post(BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require"))))
         val doc = BasicDoc(
             "name2", "content", mapOf(DocDimension.Phase.value("design")),
@@ -21,7 +21,7 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 0
     }
     "add file" {
-        val base = MemoryBase()
+        val base = SimpleBase()
         base.post(BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require"))))
         val doc = BasicDoc(
             "name2", "content", mapOf(DocDimension.Phase.value("design")),
@@ -38,7 +38,7 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 2 //name2 和 name3 都是依赖于 name，都是outofdate。
     }
     "add depend file" {
-        val base = MemoryBase()
+        val base = SimpleBase()
         base.post(BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require"))))
         val doc = BasicDoc(
             "name2", "content", mapOf(DocDimension.Phase.value("design")),
@@ -56,7 +56,7 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 1
     }
     "change depended" {
-        val base = MemoryBase()
+        val base = SimpleBase()
         val doc1 = BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require")))
         base.post(doc1)
         val doc2 = BasicDoc(
@@ -75,7 +75,7 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 0
     }
     "change itself" {
-        val base = MemoryBase()
+        val base = SimpleBase()
         val doc1 = BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require")))
         base.post(doc1)
         val doc2 = BasicDoc(

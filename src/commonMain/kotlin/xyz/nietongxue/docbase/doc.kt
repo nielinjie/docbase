@@ -42,19 +42,26 @@ data class BasicDoc(
     }
 
 
-    fun checkDependSatisfied(base: MemoryBase): Boolean {
-        if (this.declare == null) return true
+    fun checkDependSatisfied(base: SimpleBase): DependSatisfied {
+        if (this.declare == null) return DependSatisfied.NotDeclare
         return if (lock == null) {
-            false
+            DependSatisfied.Unsatisfied
         } else {
-            if (lock!!.hash != this.getHash()) return false
+            if (lock!!.hash != this.getHash()) return DependSatisfied.Unsatisfied
             val newDepends = this.declare.let {
                 base.select(it.selector)
             }
             val hashOf = newDepends.map { Depend(it.id(), it.getHash()) }
-            hashOf == this.lock!!.dependencies
+            if (hashOf == this.lock!!.dependencies) DependSatisfied.Satisfied else DependSatisfied.Unsatisfied
         }
     }
+}
+
+sealed class DependSatisfied {
+    object Satisfied : DependSatisfied()
+    object Unsatisfied : DependSatisfied()
+    object NotDeclare : DependSatisfied()
+    //TODO add 不满足的细节。比如增加减少了？
 }
 
 

@@ -13,12 +13,23 @@ fun <T> hashObject(obj: T, serializer: KSerializer<T>): Hash {
 
 fun toJsonElement(obj: Any): JsonElement {
     return when (obj) {
-        is JsonElement -> obj
+        is JsonElement -> {
+            when (obj) {
+                is JsonObject -> obj.keys.sorted().associateWith { obj[it]!! }.let { toJsonElement(it) }
+                else -> obj
+            }
+        }
+
         is String -> JsonPrimitive(obj)
         is Int -> JsonPrimitive(obj)
         is Long -> JsonPrimitive(obj)
         is Collection<*> -> JsonArray(obj.map { toJsonElement(it!!) })
-        is Map<*, *> -> JsonObject(obj.map { it.key.toString() to toJsonElement(it.value!!) }.toMap())
+        //TODO 有可能需要处理key的顺序问题。显然，hash的时候key的顺序需要一致。
+        is Map<*, *> -> JsonObject(
+            obj.map { it.key.toString() to toJsonElement(it.value!!) }
+                .sortedBy { it.first }
+                .toMap())
+
         else -> error("not supported -  $obj")
     }
 }
