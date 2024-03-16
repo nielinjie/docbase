@@ -37,12 +37,16 @@ class SimpleBase : Base {
         doc.lock = DependsLock(doc.getHash(), newDepends.map { Depend(it.id(), it.getHash()) })
     }
 
-    fun checkDependOutDated(): List<Doc> {
-        return this.docs.filter {
-            it.checkDependSatisfied(this) is DependSatisfied.Unsatisfied
+    fun checkDependOutDated(): List<Pair<Doc, DependSatisfied>> {
+        return this.docs.mapNotNull {
+            val satisfied = it.checkDependSatisfied(this)
+            if (satisfied is DependSatisfied.UnsatisfiedDiffs || satisfied is DependSatisfied.Unsatisfied) {
+                it to satisfied
+            } else {
+                null
+            }
         }
     }
-
 }
 
 

@@ -1,15 +1,10 @@
 package xyz.nietongxue.docbase
 
 import com.appmattus.crypto.Algorithm
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import xyz.nietongxue.common.base.Hash
 
-
-fun <T> hashObject(obj: T, serializer: KSerializer<T>): Hash {
-    return Json.encodeToString(serializer, obj).let { hashString(it) }
-}
 
 fun toJsonElement(obj: Any): JsonElement {
     return when (obj) {

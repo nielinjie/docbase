@@ -44,24 +44,30 @@ data class BasicDoc(
 
     fun checkDependSatisfied(base: SimpleBase): DependSatisfied {
         if (this.declare == null) return DependSatisfied.NotDeclare
-        return if (lock == null) {
-            DependSatisfied.Unsatisfied
-        } else {
-            if (lock!!.hash != this.getHash()) return DependSatisfied.Unsatisfied
-            val newDepends = this.declare.let {
-                base.select(it.selector)
+        if (this.lock == null) return DependSatisfied.SelfIsNew
+        else
+            if (lock!!.hash != this.getHash()) return DependSatisfied.SelfChanged // self changed, not depend changed.
+        val newDepends = this.declare.let {
+            base.select(it.selector)
+        }
+        val hashOf = newDepends.map { Depend(it.id(), it.getHash()) }
+        val oldDepends = this.lock?.dependencies ?: emptyList()
+        return if (hashOf == oldDepends) DependSatisfied.Satisfied else {
+            diff(oldDepends, hashOf, { it.id }, { a, b -> a.hash != b.hash }).let {
+                DependSatisfied.UnsatisfiedDiffs(it)
             }
-            val hashOf = newDepends.map { Depend(it.id(), it.getHash()) }
-            if (hashOf == this.lock!!.dependencies) DependSatisfied.Satisfied else DependSatisfied.Unsatisfied
+
         }
     }
 }
 
 sealed class DependSatisfied {
-    object Satisfied : DependSatisfied()
-    object Unsatisfied : DependSatisfied()
-    object NotDeclare : DependSatisfied()
-    //TODO add 不满足的细节。比如增加减少了？
+    data object Satisfied : DependSatisfied()
+    sealed class Unsatisfied(val reason: String) : DependSatisfied()
+    class UnsatisfiedDiffs(val diffs: Diffs) : Unsatisfied("diffs")
+    data object SelfChanged : Unsatisfied("self changed")
+    data object SelfIsNew : Unsatisfied("self is new")
+    data object NotDeclare : DependSatisfied()
 }
 
 
