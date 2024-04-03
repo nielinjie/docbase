@@ -7,43 +7,43 @@ import kotlinx.serialization.json.JsonPrimitive
 
 class HashTest : StringSpec({
     "keys" {
-        val doc = BasicDoc(
+        val doc = SimpleDoc(
             "name", "content",
             mapOf("a" to JsonPrimitive("b"))
         )
         doc.getHash().shouldBe(
-            BasicDoc(
+            SimpleDoc(
                 "name", "content",
                 mapOf("a" to JsonPrimitive("b"))
             ).getHash()
         )
     }
     "keys order" {
-        val doc = BasicDoc(
+        val doc = SimpleDoc(
             "name", "content",
             mapOf("a" to JsonPrimitive("b"), "c" to JsonPrimitive("d"))
         )
         doc.getHash().shouldBe(
-            BasicDoc(
+            SimpleDoc(
                 "name", "content",
                 mapOf("c" to JsonPrimitive("d"), "a" to JsonPrimitive("b"))
             ).getHash()
         )
     }
     "keys order not same" {
-        val doc = BasicDoc(
+        val doc = SimpleDoc(
             "name", "content",
             mapOf("a" to JsonPrimitive("b"), "e" to JsonPrimitive("f"), "c" to JsonPrimitive("d"))
         )
         doc.getHash().shouldBe(
-            BasicDoc(
+            SimpleDoc(
                 "name", "content",
                 mapOf("a" to JsonPrimitive("b"), "c" to JsonPrimitive("d"), "e" to JsonPrimitive("f"))
             ).getHash()
         )
     }
     "nested keys order" {
-        val doc = BasicDoc(
+        val doc = SimpleDoc(
             "name", "content",
             mapOf(
                 "a" to JsonObject(
@@ -55,7 +55,7 @@ class HashTest : StringSpec({
             )
         )
         doc.getHash().shouldBe(
-            BasicDoc(
+            SimpleDoc(
                 "name", "content",
                 mapOf(
                     "a" to JsonObject(

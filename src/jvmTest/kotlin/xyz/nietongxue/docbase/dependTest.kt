@@ -4,19 +4,38 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.kotest.matchers.types.shouldNotBeInstanceOf
-import xyz.nietongxue.common.base.Diff
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+import xyz.nietongxue.dev.Phase
 
 class DependTest : StringSpec({
+    SerializerM.plus(SerializersModule {
+        polymorphic(Matcher::class) {
+            subclass(DimensionMatcher::class)
+        }
+    })
+    "depend declare" {
 
+        val doc = DependsDoc(
+            "name", "content",
+            declare = (docSelector(Phase.matcher("le", "require")).declareDepend())
+        )
+        doc.getHash().shouldBe(
+            DependsDoc(
+                "name", "content",
+                declare = (docSelector(Phase.matcher("le", "require")).declareDepend())
+            ).getHash()
+        )
+    }
     "check dep" {
-        val base = SimpleBase()
-        base.post(BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require"))))
-        val doc = BasicDoc(
+        val base = DependsBase()
+        base.post(DependsDoc("name", "content", mapOf(Phase.value("require"))))
+        val doc = DependsDoc(
             "name2",
             "content",
-            mapOf(DocDimension.Phase.value("design")),
-            (docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend())
+            mapOf(Phase.value("design")),
+            (docSelector(Phase.matcher("le", "require")).declareDepend())
         )
         base.post(doc)
         (base.checkDependOutDated() shouldHaveSize 1).also {
@@ -27,24 +46,24 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 0
     }
     "add file" {
-        val base = SimpleBase()
-        base.post(BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require"))))
-        val doc = BasicDoc(
+        val base = DependsBase()
+        base.post(DependsDoc("name", "content", mapOf(Phase.value("require"))))
+        val doc = DependsDoc(
             "name2",
             "content",
-            mapOf(DocDimension.Phase.value("design")),
-            docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend()
+            mapOf(Phase.value("design")),
+            docSelector(Phase.matcher("le", "require")).declareDepend()
         )
         base.post(doc)
         (base.checkDependOutDated() shouldHaveSize 1).also {
             it.first().first.id().shouldBe(doc.id())
             it.first().second.shouldBeInstanceOf<DependSatisfied.SelfIsNew>()
         }
-        val docName3 = BasicDoc(
+        val docName3 = DependsDoc(
             "name3",
             "content",
-            mapOf(DocDimension.Phase.value("design")),
-            docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend()
+            mapOf(Phase.value("design")),
+            docSelector(Phase.matcher("le", "require")).declareDepend()
         )
         base.post(
             docName3
@@ -58,14 +77,14 @@ class DependTest : StringSpec({
         }//name2 和 name3 都是依赖于 name，都是outofdate。
     }
     "add depend file" {
-        val base = SimpleBase()
-        val docName = BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require")))
+        val base = DependsBase()
+        val docName = DependsDoc("name", "content", mapOf(Phase.value("require")))
         base.post(docName)
-        val doc = BasicDoc(
+        val doc = DependsDoc(
             "name2",
             "content",
-            mapOf(DocDimension.Phase.value("design")),
-            docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend()
+            mapOf(Phase.value("design")),
+            docSelector(Phase.matcher("le", "require")).declareDepend()
         )
         base.post(doc)
         (base.checkDependOutDated() shouldHaveSize 1).also {
@@ -74,8 +93,8 @@ class DependTest : StringSpec({
         }
         base.update(doc.id())
         base.checkDependOutDated() shouldHaveSize 0
-        val docName1 = BasicDoc(
-            "name1", "content", mapOf(DocDimension.Phase.value("require")),
+        val docName1 = DependsDoc(
+            "name1", "content", mapOf(Phase.value("require")),
         )
         base.post(
             docName1
@@ -90,14 +109,14 @@ class DependTest : StringSpec({
         }
     }
     "change depended" {
-        val base = SimpleBase()
-        val doc1 = BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require")))
+        val base = DependsBase()
+        val doc1 = DependsDoc("name", "content", mapOf(Phase.value("require")))
         base.post(doc1)
-        val doc2 = BasicDoc(
+        val doc2 = DependsDoc(
             "name2",
             "content",
-            mapOf(DocDimension.Phase.value("design")),
-            (docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend())
+            mapOf(Phase.value("design")),
+            (docSelector(Phase.matcher("le", "require")).declareDepend())
         )
         base.post(doc2)
         (base.checkDependOutDated() shouldHaveSize 1).also {
@@ -107,6 +126,7 @@ class DependTest : StringSpec({
         base.update(doc2.id())
         base.checkDependOutDated() shouldHaveSize 0
         base.set(doc1.id()) {
+            require(it is DependsDoc)
             it.copy(content = "new content")
         }
         (base.checkDependOutDated() shouldHaveSize 1).also {
@@ -121,14 +141,14 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 0
     }
     "change itself" {
-        val base = SimpleBase()
-        val doc1 = BasicDoc("name", "content", mapOf(DocDimension.Phase.value("require")))
+        val base = DependsBase()
+        val doc1 = DependsDoc("name", "content", mapOf(Phase.value("require")))
         base.post(doc1)
-        val doc2 = BasicDoc(
+        val doc2 = DependsDoc(
             "name2",
             "content",
-            mapOf(DocDimension.Phase.value("design")),
-            (docSelector(DocDimension.Phase.matcher("le", "require")).declareDepend())
+            mapOf(Phase.value("design")),
+            (docSelector(Phase.matcher("le", "require")).declareDepend())
         )
         base.post(doc2)
         (base.checkDependOutDated() shouldHaveSize 1).also {
@@ -138,6 +158,7 @@ class DependTest : StringSpec({
         base.update(doc2.id())
         base.checkDependOutDated() shouldHaveSize 0
         base.set(doc2.id()) {
+            require(it is DependsDoc)
             it.copy(content = "new content")
         }
         (base.checkDependOutDated() shouldHaveSize 1).also {

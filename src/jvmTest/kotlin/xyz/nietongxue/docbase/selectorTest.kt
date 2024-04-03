@@ -2,13 +2,14 @@ package xyz.nietongxue.docbase
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import xyz.nietongxue.dev.Area
 
 class SelectorTest : StringSpec({
     "area" {
-        val doc = BasicDoc("name", "content", mapOf(DocDimension.Area.value("/base/user")))
-        Matcher("area", "in", "/base").match(doc).shouldBe(true)
-        Matcher("area", "in", "/ba").match(doc).shouldBe(false)
-        Matcher("area", "in", "/base/user").match(doc).shouldBe(false)
-        Matcher("area", "inOrEq", "/base/user").match(doc).shouldBe(true)
+        val doc = SimpleDoc("name", "content", mapOf(Area.value("/base/user")))
+        DimensionMatcher(Area, "in", "/base").match(doc).shouldBe(true)
+        DimensionMatcher(Area, "in", "/ba").match(doc).shouldBe(false)
+        DimensionMatcher(Area, "in", "/base/user").match(doc).shouldBe(false)
+        DimensionMatcher(Area, "inOrEq", "/base/user").match(doc).shouldBe(true)
     }
 })

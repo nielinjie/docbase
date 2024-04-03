@@ -1,5 +1,4 @@
-
-val serializationVersion = "1.6.+"
+val serializationVersion = "1.6.3"
 
 
 plugins {
@@ -16,9 +15,8 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-}
-dependencies {
-    implementation(project(mapOf("path" to ":common")))
+    maven("https://repo.repsy.io/mvn/nielinjie/default")
+
 }
 
 
@@ -47,9 +45,8 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("com.benasher44:uuid:0.7.0")
-                implementation("com.appmattus.crypto:cryptohash:0.10.1")
+                implementation("xyz.nietongxue:common:1.0-SNAPSHOT")
 
-                implementation(project(":common"))
 
             }
         }
@@ -57,6 +54,12 @@ kotlin {
             dependencies {
                 implementation("io.kotest:kotest-framework-engine:5.5.5")
             }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation("com.appmattus.crypto:cryptohash:0.10.1")
+            }
+
         }
         val jvmTest by getting {
             dependencies {

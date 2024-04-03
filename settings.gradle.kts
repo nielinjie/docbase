@@ -10,5 +10,5 @@ plugins {
 }
 
 rootProject.name = "docbaseK"
-include(":common")
-project(":common").projectDir = File(settingsDir, "../common-kt")
+//include(":common")
+//project(":common").projectDir = File(settingsDir, "../common-kt")

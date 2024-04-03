@@ -1,47 +1,33 @@
 package xyz.nietongxue.docbase
 
-import com.appmattus.crypto.Algorithm
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
+import kotlinx.serialization.modules.SerializersModule
 import xyz.nietongxue.common.base.Hash
+import xyz.nietongxue.docbase.SerializerM.j
 
 
-fun toJsonElement(obj: Any): JsonElement {
-    return when (obj) {
-        is JsonElement -> {
-            when (obj) {
-                is JsonObject -> obj.keys.sorted().associateWith { obj[it]!! }.let { toJsonElement(it) }
-                else -> obj
-            }
+
+fun hashProperties(vararg property: Pair<String, JsonElement>): Hash {
+    return hashString(property.toMap().let {
+        j().encodeToJsonElement(it).let { sortJsonElementKeysDeep(it) }.toString()
+    })
+}
+
+fun sortJsonElementKeysDeep(jsonElement: JsonElement): JsonElement {
+    return when (jsonElement) {
+        is JsonObject -> {
+            val sortedKeys = jsonElement.keys.sorted()
+            val sortedMap = sortedKeys.associateWith { key -> sortJsonElementKeysDeep(jsonElement[key]!!) }
+            JsonObject(sortedMap)
         }
 
-        is String -> JsonPrimitive(obj)
-        is Int -> JsonPrimitive(obj)
-        is Long -> JsonPrimitive(obj)
-        is Collection<*> -> JsonArray(obj.map { toJsonElement(it!!) })
-        //TODO 有可能需要处理key的顺序问题。显然，hash的时候key的顺序需要一致。
-        is Map<*, *> -> JsonObject(
-            obj.map { it.key.toString() to toJsonElement(it.value!!) }
-                .sortedBy { it.first }
-                .toMap())
+        is JsonArray -> {
+            val sortedArray = jsonElement.map { sortJsonElementKeysDeep(it) }
+            JsonArray(sortedArray)
+        }
 
-        else -> error("not supported -  $obj")
+        else -> jsonElement
     }
 }
 
-fun hashProperties(vararg property: Pair<String, Any>): Hash {
-    return property.map {
-        it.first to toJsonElement(it.second)
-    }.toMap().let {
-        Json.encodeToString(it)
-    }.let { hashString(it) }
-}
-
-
-@OptIn(ExperimentalStdlibApi::class)
-fun hashString(s: String): Hash {
-    val digest = Algorithm.MD5.createDigest()
-    return digest.digest(s.encodeToByteArray()).toHexString().let {
-        Hash(it)
-    }
-}
+expect fun hashString(s: String): Hash

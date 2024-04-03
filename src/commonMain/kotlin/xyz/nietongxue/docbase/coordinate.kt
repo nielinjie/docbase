@@ -29,61 +29,11 @@ interface DocDimension {
         else -> error("unknown opt")
     }
 
-    object Area : DocDimension, PathLikeDimension("area") {
-        override fun match(propertyValue: JsonElement, opt: String, operated: String): Boolean {
-            val operatedPath = Path.fromString(operated)
-            val propertyPath = Path.fromString(propertyValue.jsonPrimitive.content)
-            return when (opt) {
-                "in" -> (propertyPath).isDescendantOf(operatedPath)
-                "inOrEq" -> propertyPath == operatedPath || (propertyPath).isDescendantOf(operatedPath)
-                else -> error("unknown opt")
-            }
-        }
-    }
 
-    object Aspect : DocDimension,
-        CategoryDimension("aspect", listOf("entity", "info", "function", "presentation", "page")) {
-        override fun match(propertyValue: JsonElement, opt: String, operated: String): Boolean {
-            return simpleStringMatch(opt, propertyValue, operated)
-        }
-
-        override fun value(value: String): Pair<String, JsonElement> {
-            return if (this.categories.contains(value)) this.name to JsonPrimitive(value)
-            else error("not a valid category")
-        }
-
-
-    }
-
-    //TODO version repository
-//    object Version : MaterialDimension,
-//        OrderedDimension<SingleBaseVersion>("version", VersionSingleStream(emptyList()).toList().toOrdered())
-    object Layer : DocDimension,
-        OrderedDimension("layer", listOf("material", "model", "component", "artifact", "runtime")) {
-        override fun match(propertyValue: JsonElement, opt: String, operated: String): Boolean {
-            return orderedStringMatch(opt, propertyValue, operated, ordered)
-        }
-
-        override fun value(value: String): Pair<String, JsonElement> {
-            return if (this.ordered.contains(value)) this.name to JsonPrimitive(value)
-            else error("not a valid category")
-        }
-    }
-
-    object Phase : DocDimension, OrderedDimension("phase", listOf("require", "design", "develop", "test", "release")) {
-        override fun match(propertyValue: JsonElement, opt: String, operated: String): Boolean {
-            return orderedStringMatch(opt, propertyValue, operated, ordered)
-        }
-
-        override fun value(value: String): Pair<String, JsonElement> {
-            return if (this.ordered.contains(value)) this.name to JsonPrimitive(value)
-            else error("not a valid category")
-        }
-    }
 
     fun match(propertyValue: JsonElement, opt: String, operated: String): Boolean // (prop opt operated) is true?
-    fun matcher(opt: String, operated: String): Matcher {
-        return Matcher(this.name, opt, operated)
+    fun matcher(opt: String, operated: String): DimensionMatcher {
+        return DimensionMatcher(this, opt, operated)
     }
 
     fun value(value: String): Pair<String, JsonElement> {
@@ -95,21 +45,20 @@ interface DocDimension {
 
 }
 
-fun fromDimensionName(string: String): DocDimension {
-    return when (string) {
-        "area" -> DocDimension.Area
-        "aspect" -> DocDimension.Aspect
-        "layer" -> DocDimension.Layer
-        "phase" -> DocDimension.Phase
-        else -> error("unknown dimension")
-    }
-}
+//fun fromDimensionName(string: String): DocDimension {
+//    return when (string) {
+//        "area" -> DocDimension.Area
+//        "aspect" -> DocDimension.Aspect
+//        "layer" -> DocDimension.Layer
+//        "phase" -> DocDimension.Phase
+//        else -> error("unknown dimension")
+//    }
+//}
 
 @Serializable
-class Matcher(val dimensionName: String, val opt: String, val value: String) {
-    fun match(doc: BasicDoc): Boolean {
-        val dimension = fromDimensionName(dimensionName)
-        val value = doc.attrs[dimensionName]
+class DimensionMatcher(val dimension: DocDimension, val opt: String, val value: String):Matcher {
+    override fun match(doc: Doc): Boolean {
+        val value = doc.attrs[dimension.name]
         return if (value == null) {
             false //TODO 应该是true？没提及就是所有的？
         } else {
@@ -118,40 +67,3 @@ class Matcher(val dimensionName: String, val opt: String, val value: String) {
 
     }
 }
-
-@Serializable
-sealed interface DocSelector {
-    fun match(doc: BasicDoc): Boolean
-}
-
-@Serializable
-class DocSelectorAnd(val pres: List<Matcher>) : DocSelector { //所有的都and
-    override fun match(doc: BasicDoc): Boolean {
-        return pres.all { it.match(doc) }
-    }
-}
-
-fun docSelector(vararg matchers: Matcher): DocSelector {
-    return DocSelectorAnd(matchers.toList())
-}
-
-@Serializable
-class DocSelectorOr(val selectors: List<DocSelector>) : DocSelector {
-    override fun match(doc: BasicDoc): Boolean {
-        return selectors.any { it.match(doc) }
-    }
-}
-
-
-@Serializable
-class DocSelectorNot(val selector: DocSelector) : DocSelector {
-    override fun match(doc: BasicDoc): Boolean {
-        return !selector.match(doc)
-    }
-}
-
-
-
-
-
-

@@ -1,29 +1,12 @@
 package xyz.nietongxue.docbase
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import xyz.nietongxue.common.base.*
+import xyz.nietongxue.docbase.SerializerM.j
 
-
-interface Doc : WithHash, HasDepends {
-    fun id(): Id
-    val attrs: Attrs<JsonElement>
-    val name: String
-    val content: String
-}
-
-
-@Serializable
-data class BasicDoc(
-    override val name: String, override val content: String,
-    override val attrs: Attrs<JsonElement> = mutableMapOf(),
-    override val declare: DependDeclare? = null,
-    override var lock: DependsLock? = null
-) : Doc {
-    override fun id(): Id {
+interface Doc : WithHash {
+    fun id(): Id{
         val path = this.attrs["path"]?.jsonPrimitive?.content
         return if (path != null) {
             Path.fromString(path).append(this.name)
@@ -31,18 +14,48 @@ data class BasicDoc(
             Path.fromString(this.name)
         }.asString()
     }
+    val attrs: Attrs<JsonElement>
+    val name: String
+    val content: String
+
+    fun hashProps(): List<Pair<String, JsonElement>> = listOf(
+        "name" to JsonPrimitive(name),
+        "content" to JsonPrimitive(content),
+        "attrs" to j().encodeToJsonElement<Attrs<JsonElement>>(attrs)
+    )
 
     override fun getHash(): Hash {
-        return hashProperties(
-            "name" to name,
-            "content" to content,
-            "attrs" to attrs,
-            "declares" to Json.encodeToJsonElement(declare),
-        )
+        return hashProperties(*hashProps().toTypedArray())
+    }
+}
+
+@Serializable
+data class SimpleDoc(
+    override val name: String,
+    override val content: String,
+    override val attrs: Attrs<JsonElement> = mutableMapOf()
+) : Doc {
+
+
+
+}
+
+
+@Serializable
+data class DependsDoc(
+    override val name: String, override val content: String,
+    override val attrs: Attrs<JsonElement> = mutableMapOf(),
+    override val declare: DependDeclare? = null,
+    override var lock: DependsLock? = null
+) : Doc, HasDepends {
+
+
+    override fun hashProps(): List<Pair<String, JsonElement>> {
+        return super.hashProps() + ("declares" to j().encodeToJsonElement(declare))
     }
 
 
-    fun checkDependSatisfied(base: SimpleBase): DependSatisfied {
+    fun checkDependSatisfied(base: DependsBase): DependSatisfied {
         if (this.declare == null) return DependSatisfied.NotDeclare
         if (this.lock == null) return DependSatisfied.SelfIsNew
         else
@@ -61,14 +74,7 @@ data class BasicDoc(
     }
 }
 
-sealed class DependSatisfied {
-    data object Satisfied : DependSatisfied()
-    sealed class Unsatisfied(val reason: String) : DependSatisfied()
-    class UnsatisfiedDiffs(val diffs: Diffs) : Unsatisfied("diffs")
-    data object SelfChanged : Unsatisfied("self changed")
-    data object SelfIsNew : Unsatisfied("self is new")
-    data object NotDeclare : DependSatisfied()
-}
+
 
 
 

@@ -1,9 +1,9 @@
 package xyz.nietongxue.docbase
 
 import kotlinx.serialization.Serializable
+import xyz.nietongxue.common.base.Diffs
 import xyz.nietongxue.common.base.Hash
 import xyz.nietongxue.common.base.Id
-import xyz.nietongxue.common.coordinate.ValueBasedPredicate
 
 @Serializable
 data class DependsLock(val hash: Hash, val dependencies: List<Depend>)
@@ -21,15 +21,24 @@ interface HasDepends {
 }
 
 
-
 fun DocSelector.declareDepend(): DependDeclare {
     return DependDeclare(this)
 }
 
-fun List<Matcher>.declareDepend(): DependDeclare {
+fun List<DimensionMatcher>.declareDepend(): DependDeclare {
     return DependDeclare(DocSelectorAnd(this))
 }
 
-fun Matcher.declareDepend(): DependDeclare {
+fun DimensionMatcher.declareDepend(): DependDeclare {
     return DependDeclare(DocSelectorAnd(listOf(this)))
+}
+
+
+sealed class DependSatisfied {
+    data object Satisfied : DependSatisfied()
+    sealed class Unsatisfied(val reason: String) : DependSatisfied()
+    class UnsatisfiedDiffs(val diffs: Diffs) : Unsatisfied("diffs")
+    data object SelfChanged : Unsatisfied("self changed")
+    data object SelfIsNew : Unsatisfied("self is new")
+    data object NotDeclare : DependSatisfied()
 }

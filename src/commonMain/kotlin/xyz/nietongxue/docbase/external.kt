@@ -1,3 +1,7 @@
 package xyz.nietongxue.docbase
 
-interface ExternalSource
+interface ExternalSource{
+
+}
+
+
