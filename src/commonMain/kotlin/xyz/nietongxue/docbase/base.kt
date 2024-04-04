@@ -15,6 +15,10 @@ open class DefaultBase : Base {
         return this.docs.find { it.id() == id } ?: error("not found")
     }
 
+    fun exists(id: Id): Boolean {
+        return this.docs.any { it.id() == id }
+    }
+
     fun post(doc: Doc) {
         if (this.docs.any { it.id() == doc.id() }) error("doc is existed, use set to modify")
         docs.add(doc)
@@ -26,6 +30,15 @@ open class DefaultBase : Base {
         val old = this.docs[index]
         val new = fn(old)
         this.docs[index] = new
+    }
+
+    fun postOrSet(doc: Doc) {
+        val index = this.docs.indexOfFirst { it.id() == doc.id() }
+        if (index == -1) {
+            docs.add(doc)
+        } else {
+            docs[index] = doc
+        }
     }
 }
 

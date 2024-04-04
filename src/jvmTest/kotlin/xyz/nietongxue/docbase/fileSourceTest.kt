@@ -1,7 +1,9 @@
 package xyz.nietongxue.docbase
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 
@@ -28,12 +30,80 @@ class FileSourceTest : StringSpec({
             it.name shouldBe "a.txt"
         }
     }
-    "base update"{
+    "base update" {
         val base = DefaultBase()
         val dir = File(baseDir, "fileSourceTest")
         val source = FileSystemSource(dir)
         source.updateBase(base)
-        base
-//        base.select(docSelector(DocDimension.Path.matcher("eq", "fileSystemSource://$dir/a.txt"))).size shouldBe 1
+        (base.docs shouldHaveSize 2).also {
+            it.first().also {
+                it.shouldBeInstanceOf<ReferringDoc>()
+                it.name shouldBe "a.txt"
+                it.referring.also {
+                    it.refPath shouldBe "a.txt"
+                    it.fileContentHash shouldBe hashBytes(File(dir, "a.txt").readBytes())
+                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                }
+            }
+        }
+    }
+    "base update with same file" {
+        val base = DefaultBase()
+        val dir = File(baseDir, "fileSourceTest")
+        val source = FileSystemSource(dir)
+        source.updateBase(base)
+        source.updateBase(base)
+        (base.docs shouldHaveSize 2).also {
+            it.first().also {
+                it.shouldBeInstanceOf<ReferringDoc>()
+                it.name shouldBe "a.txt"
+                it.referring.also {
+                    it.refPath shouldBe "a.txt"
+                    it.fileContentHash shouldBe hashBytes(File(dir, "a.txt").readBytes())
+                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                }
+            }
+        }
+    }
+    "base update with different file" {
+        val base = DefaultBase()
+        val dir = File(baseDir, "fileSourceTest")
+        val source = FileSystemSource(dir)
+        source.updateBase(base)
+        val oldContent = File(dir, "a.txt").readText()
+        File(dir, "a.txt").writeText("new content")
+        source.updateBase(base)
+        (base.docs shouldHaveSize 2).also {
+            it.first().also {
+                it.shouldBeInstanceOf<ReferringDoc>()
+                it.name shouldBe "a.txt"
+                it.referring.also {
+                    it.refPath shouldBe "a.txt"
+                    it.fileContentHash shouldBe hashBytes(File(dir, "a.txt").readBytes())
+                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                }
+            }
+        }
+        File(dir, "a.txt").writeText(oldContent)
+    }
+    "base update with new file" {
+        val base = DefaultBase()
+        val dir = File(baseDir, "fileSourceTest")
+        val source = FileSystemSource(dir)
+        source.updateBase(base)
+        File(dir, "b.txt").writeText("new content")
+        source.updateBase(base)
+        (base.docs shouldHaveSize 3).also {
+            it.last().also {
+                it.shouldBeInstanceOf<ReferringDoc>()
+                it.name shouldBe "b.txt"
+                it.referring.also {
+                    it.refPath shouldBe "b.txt"
+                    it.fileContentHash shouldBe hashBytes(File(dir, "b.txt").readBytes())
+                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                }
+            }
+        }
+        File(dir, "b.txt").delete()
     }
 })

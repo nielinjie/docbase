@@ -22,6 +22,9 @@ class SerializeTest : StringSpec(
             polymorphic(Matcher::class) {
                 subclass(DimensionMatcher::class)
             }
+            polymorphic(DocDimension::class) {
+                subclass(Phase::class)
+            }
         })
         "serialize" {
             val base = DefaultBase()
@@ -37,7 +40,6 @@ class SerializeTest : StringSpec(
             json2.shouldContainInOrder("phase", "design")
             json2.shouldContainInOrder("phase", "le", "require")
             //TODO 默认的序列化出来有点长。
-//        println(json2)
             val docs = j().decodeFromString<List<Doc>>(json2)
             (docs shouldHaveSize 2).also {
                 (it.last().id()).shouldBe(doc2.id())

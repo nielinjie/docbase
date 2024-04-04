@@ -14,6 +14,9 @@ class DependTest : StringSpec({
         polymorphic(Matcher::class) {
             subclass(DimensionMatcher::class)
         }
+        polymorphic(DocDimension::class) {
+            subclass(Phase::class)
+        }
     })
     "depend declare" {
 

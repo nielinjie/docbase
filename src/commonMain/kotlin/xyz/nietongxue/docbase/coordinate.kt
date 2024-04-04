@@ -45,15 +45,6 @@ interface DocDimension {
 
 }
 
-//fun fromDimensionName(string: String): DocDimension {
-//    return when (string) {
-//        "area" -> DocDimension.Area
-//        "aspect" -> DocDimension.Aspect
-//        "layer" -> DocDimension.Layer
-//        "phase" -> DocDimension.Phase
-//        else -> error("unknown dimension")
-//    }
-//}
 
 @Serializable
 class DimensionMatcher(val dimension: DocDimension, val opt: String, val value: String):Matcher {
