@@ -5,8 +5,14 @@ import xyz.nietongxue.common.base.Id
 interface Base
 
 
-open class DefaultBase : Base {
+open class DefaultBase(val worker: Persistence = DoNothingPersistence) : Base {
     val docs = mutableListOf<Doc>()
+
+    init {
+        worker.setBase(this)
+        worker.load()
+    }
+
     fun select(selector: DocSelector): List<Doc> {
         return docs.filter { selector.match(it) }
     }
@@ -22,6 +28,7 @@ open class DefaultBase : Base {
     fun post(doc: Doc) {
         if (this.docs.any { it.id() == doc.id() }) error("doc is existed, use set to modify")
         docs.add(doc)
+        worker.save()
     }
 
     fun set(id: Id, fn: (Doc) -> Doc) {
@@ -30,6 +37,7 @@ open class DefaultBase : Base {
         val old = this.docs[index]
         val new = fn(old)
         this.docs[index] = new
+        worker.save()
     }
 
     fun postOrSet(doc: Doc) {
@@ -39,10 +47,11 @@ open class DefaultBase : Base {
         } else {
             docs[index] = doc
         }
+        worker.save()
     }
 }
 
-class DependsBase : DefaultBase() {
+class DependsBase(worker: Persistence = DoNothingPersistence) : DefaultBase(worker) {
 
 
     fun update(id: Id) {
@@ -55,6 +64,7 @@ class DependsBase : DefaultBase() {
             this.select(it.selector)
         }
         doc.lock = DependsLock(doc.getHash(), newDepends.map { Depend(it.id(), it.getHash()) })
+        worker.save()
     }
 
     fun checkDependOutDated(): List<Pair<Doc, DependSatisfied>> {
