@@ -22,7 +22,7 @@ repositories {
 
 kotlin {
     jvm {
-        jvmToolchain(19)
+        jvmToolchain(21)
         withJava()
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -66,6 +66,18 @@ kotlin {
                 implementation("io.kotest:kotest-runner-junit5:5.5.5")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
             }
+        }
+    }
+}
+publishing {
+    repositories {
+        maven {
+            name = "repsy"
+            credentials {
+                username = project.findProperty("repsyUser") as String? ?: System.getenv("REPSYUSER")
+                password = project.findProperty("repsyToken") as String? ?: System.getenv("REPSYPASS")
+            }
+            url = uri("https://repo.repsy.io/mvn/nielinjie/default")
         }
     }
 }

@@ -1,10 +1,11 @@
 package xyz.nietongxue.docbase
 
-import kotlinx.serialization.json.*
-import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.encodeToJsonElement
 import xyz.nietongxue.common.base.Hash
 import xyz.nietongxue.docbase.SerializerM.j
-
 
 
 fun hashProperties(vararg property: Pair<String, JsonElement>): Hash {

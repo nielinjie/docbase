@@ -1,6 +1,7 @@
 package xyz.nietongxue.docbase
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 
 @Serializable
@@ -38,5 +39,17 @@ interface Matcher {
     fun match(doc: Doc): Boolean
 }
 
+@Serializable
+class IdMatcher(val id: String) : Matcher {
+    override fun match(doc: Doc): Boolean {
+        return doc.id() == id
+    }
+}
 
+@Serializable
+class AttrMatcher(val key: String, val value: JsonElement) : Matcher {
+    override fun match(doc: Doc): Boolean {
+        return doc.attrs[key] == value
+    }
+}
 

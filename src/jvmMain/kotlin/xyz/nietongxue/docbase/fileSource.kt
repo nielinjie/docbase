@@ -1,7 +1,6 @@
 package xyz.nietongxue.docbase
 
 import java.io.File
-import java.net.URL
 
 
 fun listAllFiles(dir: File): List<File> {
