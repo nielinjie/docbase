@@ -17,6 +17,12 @@ data class Derived(
 )
 
 @Serializable
+data class Deriving(
+    val type: String,
+    val params: Map<String, String>
+)
+
+@Serializable
 data class DerivedDoc(
     override val name: Name,
     override val content: String,
@@ -30,33 +36,28 @@ data class DerivedDoc(
 }
 
 
-fun derivedDoc(content: String, doc: Doc, derived: Derived): DerivedDoc {
+fun derivedDoc(content: String, doc: Doc, deriving: Deriving): DerivedDoc {
     fun Map<String, String>.pairedString(): String {
         return this.map { "${it.key}_${it.value}" }.joinToString("_")
     }
 
-    fun Derived.toDocName(originName: String): String {
+    fun Deriving.toDocName(originName: String): String {
         return "$originName-${type}-${params.pairedString()}"
     }
 
-    fun <T> List<T>.ensure(value: T): List<T> {
-        return if (this.contains(value)) this else this + value
-    }
-    return (
-            derived.copy(origins = derived.origins.ensure(doc.id()))).let {
-        DerivedDoc(
-            derived.toDocName(doc.name),
-            content,
-            doc.attrs,
-            it
-        )
-    }
+    return DerivedDoc(
+        deriving.toDocName(doc.name),
+        content,
+        doc.attrs,
+        Derived(deriving.type, deriving.params, listOf(doc.id()))
+    )
+
 }
 
 
 // pureText content
 fun pureTextDoc(ref: ReferringDoc): Doc {
-    return derivedDoc(ref.text(), ref, Derived("pureText", mapOf(), listOf(ref.id())))
+    return derivedDoc(ref.text(), ref, Deriving("pureText", mapOf()))
 }
 
 // segmentsText content
