@@ -16,7 +16,7 @@ fun listAllFiles(dir: File): List<File> {
 
 class FileSystemImporter(val basePath: File) : Importer {
 
-    override val sourceInfo = "fileSystemSource://$basePath"
+    override val sourceInfo = "fileSystemSource:$basePath"
     override fun raw(path:String): ByteArray {
         return File(basePath, path).readBytes()
     }

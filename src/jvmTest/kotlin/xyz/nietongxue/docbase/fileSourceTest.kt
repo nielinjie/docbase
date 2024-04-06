@@ -25,9 +25,9 @@ class FileSourceTest : StringSpec({
             it.referring.also {
                 it.refPath shouldBe "a.txt"
                 it.fileContentHash shouldBe hashBytes(File(dir, "a.txt").readBytes())
-                it.sourceInfo shouldBe "fileSystemSource://$dir"
+                it.sourceInfo shouldBe "fileSystemSource:$dir"
             }
-            it.attrs["path"]!!.jsonPrimitive.content shouldBe "fileSystemSource://$dir/a.txt"
+            it.attrs["path"]!!.jsonPrimitive.content shouldBe "fileSystemSource:$dir"
             it.name shouldBe "a.txt"
         }
     }
@@ -43,7 +43,7 @@ class FileSourceTest : StringSpec({
                 it.referring.also {
                     it.refPath shouldBe "a.txt"
                     it.fileContentHash shouldBe hashBytes(File(dir, "a.txt").readBytes())
-                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                    it.sourceInfo shouldBe "fileSystemSource:$dir"
                 }
             }
         }
@@ -61,7 +61,7 @@ class FileSourceTest : StringSpec({
                 it.referring.also {
                     it.refPath shouldBe "a.txt"
                     it.fileContentHash shouldBe hashBytes(File(dir, "a.txt").readBytes())
-                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                    it.sourceInfo shouldBe "fileSystemSource:$dir"
                 }
             }
         }
@@ -81,7 +81,7 @@ class FileSourceTest : StringSpec({
                 it.referring.also {
                     it.refPath shouldBe "a.txt"
                     it.fileContentHash shouldBe hashBytes(File(dir, "a.txt").readBytes())
-                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                    it.sourceInfo shouldBe "fileSystemSource:$dir"
                 }
             }
         }
@@ -101,7 +101,7 @@ class FileSourceTest : StringSpec({
                 it.referring.also {
                     it.refPath shouldBe "b.txt"
                     it.fileContentHash shouldBe hashBytes(File(dir, "b.txt").readBytes())
-                    it.sourceInfo shouldBe "fileSystemSource://$dir"
+                    it.sourceInfo shouldBe "fileSystemSource:$dir"
                 }
             }
         }
