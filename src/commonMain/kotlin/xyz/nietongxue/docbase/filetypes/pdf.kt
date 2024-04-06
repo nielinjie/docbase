@@ -2,7 +2,6 @@ package xyz.nietongxue.docbase.filetypes
 
 import xyz.nietongxue.common.base.Path
 import xyz.nietongxue.docbase.Importer
-import xyz.nietongxue.docbase.FileType
 import xyz.nietongxue.docbase.Segment
 import xyz.nietongxue.docbase.SegmentMethod
 

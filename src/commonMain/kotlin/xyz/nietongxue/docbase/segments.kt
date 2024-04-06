@@ -1,5 +1,8 @@
 package xyz.nietongxue.docbase
 
+import xyz.nietongxue.common.base.Path
+import xyz.nietongxue.docbase.filetypes.fileTypes
+
 
 interface Segment{
     class StringSegment(val content: String) : Segment
@@ -53,4 +56,10 @@ interface SegmentMethod {
             }
         }
     }
+}
+
+fun ReferringDoc.segment(segmentMethod: SegmentMethod, source: Importer): List<Segment> {
+    val name = Path.fromString(this.referring.refPath)
+    val fileType = fileTypes.firstOrNull { it.forPath(name) } ?: error("No file type for $name")
+    return fileType.segment(this.referring.refPath, segmentMethod, source)
 }

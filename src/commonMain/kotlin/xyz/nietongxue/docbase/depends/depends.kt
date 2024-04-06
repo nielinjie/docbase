@@ -1,10 +1,11 @@
-package xyz.nietongxue.docbase
+package xyz.nietongxue.docbase.depends
 
 import kotlinx.serialization.Serializable
 import xyz.nietongxue.common.base.Change
 import xyz.nietongxue.common.base.Diffs
 import xyz.nietongxue.common.base.Hash
 import xyz.nietongxue.common.base.Id
+import xyz.nietongxue.docbase.*
 
 @Serializable
 data class DependsLock(val hash: Hash, val dependencies: List<Depend>)
@@ -22,7 +23,7 @@ interface HasDepends {
 }
 
 class DependsBase(worker: Persistence, listeners: MutableList<DocListener>,
-    baseListeners: MutableList<BaseListener>) : DefaultBase(worker, listeners,baseListeners) {
+                  baseListeners: MutableList<BaseListener>) : DefaultBase(worker, listeners,baseListeners) {
 
 
     fun update(id: Id) {

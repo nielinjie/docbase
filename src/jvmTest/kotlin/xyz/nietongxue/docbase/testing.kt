@@ -1,5 +1,7 @@
 package xyz.nietongxue.docbase
 
+import xyz.nietongxue.docbase.depends.DependsBase
+
 fun testingBase(): DefaultBase {
     val base = DefaultBase(DoNothingPersistence, mutableListOf(), mutableListOf())
     return base
@@ -11,7 +13,7 @@ fun testingBaseWithPersistence(jsonStore: JsonStore): DefaultBase {
 }
 
 
-fun testingDependBase():DependsBase{
+fun testingDependBase(): DependsBase {
     val base = DependsBase(DoNothingPersistence, mutableListOf(), mutableListOf())
     return base
 }

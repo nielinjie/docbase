@@ -7,6 +7,7 @@ import kotlinx.serialization.modules.subclass
 import xyz.nietongxue.common.base.Serializing
 import xyz.nietongxue.common.base.Serializing.j
 import xyz.nietongxue.dev.Phase
+import xyz.nietongxue.docbase.depends.DependsDoc
 
 class JsonStore(var json: JsonElement = JsonArray(listOf())) {
 }
