@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import xyz.nietongxue.common.base.Attrs
 import xyz.nietongxue.common.base.Hash
-import xyz.nietongxue.docbase.SerializerM.j
+import xyz.nietongxue.common.base.Serializing.j
 
 @Serializable
 data class Referring(

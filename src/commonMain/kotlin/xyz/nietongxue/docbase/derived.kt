@@ -6,7 +6,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import xyz.nietongxue.common.base.Attrs
 import xyz.nietongxue.common.base.Id
 import xyz.nietongxue.common.base.Name
-import xyz.nietongxue.docbase.SerializerM.j
+import xyz.nietongxue.common.base.Serializing.j
 
 
 @Serializable

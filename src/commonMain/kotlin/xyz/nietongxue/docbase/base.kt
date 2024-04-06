@@ -1,8 +1,10 @@
 package xyz.nietongxue.docbase
 
 import xyz.nietongxue.common.base.Id
+import xyz.nietongxue.common.base.Change
 
 interface Base
+
 
 
 interface DocListener {

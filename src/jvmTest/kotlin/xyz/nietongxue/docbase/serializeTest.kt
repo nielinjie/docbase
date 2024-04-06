@@ -8,13 +8,14 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import xyz.nietongxue.common.base.Serializing
+import xyz.nietongxue.common.base.Serializing.j
 import xyz.nietongxue.dev.Phase
-import xyz.nietongxue.docbase.SerializerM.j
 
 
 class SerializeTest : StringSpec(
     {
-        SerializerM.plus(SerializersModule {
+        Serializing.plus(SerializersModule {
             polymorphic(Doc::class) {
                 subclass(SimpleDoc::class)
                 subclass(DependsDoc::class)

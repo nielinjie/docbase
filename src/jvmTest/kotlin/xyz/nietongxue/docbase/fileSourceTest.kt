@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.serialization.json.jsonPrimitive
+import xyz.nietongxue.common.base.hashBytes
 import java.io.File
 
 val baseDir = File("/Users/nielinjie/Projects/docbaseK")

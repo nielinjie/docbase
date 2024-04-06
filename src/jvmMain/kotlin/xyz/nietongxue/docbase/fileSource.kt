@@ -26,6 +26,9 @@ class FileSystemImporter(val basePath: File) : Importer {
         }
     }
 
+    override fun onOpen(base: Base) {
+        updateBase(base as DefaultBase)
+    }
     override fun updateBase(docBase: DefaultBase) {
         val refDocs = refDocs()
         refDocs.forEach {

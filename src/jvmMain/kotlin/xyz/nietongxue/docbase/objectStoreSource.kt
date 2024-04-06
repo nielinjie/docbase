@@ -15,4 +15,8 @@ class ObjectStoreSource(basePath: URL) : Importer {
         TODO("Not yet implemented")
     }
 
+    override fun onOpen(base: Base) {
+        TODO("Not yet implemented")
+    }
+
 }

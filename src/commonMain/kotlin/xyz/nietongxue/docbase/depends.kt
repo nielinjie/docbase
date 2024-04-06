@@ -1,6 +1,7 @@
 package xyz.nietongxue.docbase
 
 import kotlinx.serialization.Serializable
+import xyz.nietongxue.common.base.Change
 import xyz.nietongxue.common.base.Diffs
 import xyz.nietongxue.common.base.Hash
 import xyz.nietongxue.common.base.Id

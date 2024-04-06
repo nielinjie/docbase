@@ -1,6 +1,7 @@
 package xyz.nietongxue.docbase
 
 import kotlinx.serialization.json.JsonPrimitive
+import xyz.nietongxue.common.base.hashBytes
 import java.io.File
 
 fun refDoc(relativePath: File, base: File, sourceInfo: String): ReferringDoc {

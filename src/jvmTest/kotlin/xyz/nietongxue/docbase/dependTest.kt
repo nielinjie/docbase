@@ -7,10 +7,11 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import xyz.nietongxue.common.base.Serializing
 import xyz.nietongxue.dev.Phase
 
 class DependTest : StringSpec({
-    SerializerM.plus(SerializersModule {
+    Serializing.plus(SerializersModule {
         polymorphic(Matcher::class) {
             subclass(DimensionMatcher::class)
         }
