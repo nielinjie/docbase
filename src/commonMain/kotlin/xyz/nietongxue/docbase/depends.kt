@@ -20,6 +20,38 @@ interface HasDepends {
 
 }
 
+class DependsBase(worker: Persistence, listeners: MutableList<DocListener>,
+    baseListeners: MutableList<BaseListener>) : DefaultBase(worker, listeners,baseListeners) {
+
+
+    fun update(id: Id) {
+        val doc = this.docs.find { it.id() == id } ?: error("no id find")
+        require(doc is DependsDoc) {
+            "doc is not DependsDoc"
+        }
+        if (doc.declare == null) return
+        val newDepends = doc.declare.let {
+            this.select(it.selector)
+        }
+        doc.lock = DependsLock(doc.getHash(), newDepends.map { Depend(it.id(), it.getHash()) })
+        listeners.forEach {
+            it.onChanged(doc, Change.Changed)
+        }
+        persistence.save()
+    }
+
+    fun checkDependOutDated(): List<Pair<Doc, DependSatisfied>> {
+        return this.docs.mapNotNull {
+            if (it !is DependsDoc) return@mapNotNull null
+            val satisfied = it.checkDependSatisfied(this)
+            if (satisfied is DependSatisfied.UnsatisfiedDiffs || satisfied is DependSatisfied.Unsatisfied) {
+                it to satisfied
+            } else {
+                null
+            }
+        }
+    }
+}
 
 fun DocSelector.declareDepend(): DependDeclare {
     return DependDeclare(this)

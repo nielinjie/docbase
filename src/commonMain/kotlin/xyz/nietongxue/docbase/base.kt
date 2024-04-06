@@ -5,12 +5,24 @@ import xyz.nietongxue.common.base.Id
 interface Base
 
 
-open class DefaultBase(val worker: Persistence = DoNothingPersistence) : Base {
+interface DocListener {
+    fun onChanged(doc: Doc, change: Change)
+}
+interface BaseListener {
+    fun onOpen(base: Base)
+}
+
+open class DefaultBase(
+    val persistence: Persistence,
+    val listeners: MutableList<DocListener>,
+    val baseListeners: MutableList<BaseListener>
+) : Base {
     val docs = mutableListOf<Doc>()
 
     init {
-        worker.setBase(this)
-        worker.load()
+        persistence.setBase(this)
+        persistence.load()
+        baseListeners.forEach { it.onOpen(this) }
     }
 
     fun select(selector: DocSelector): List<Doc> {
@@ -28,7 +40,10 @@ open class DefaultBase(val worker: Persistence = DoNothingPersistence) : Base {
     fun post(doc: Doc) {
         if (this.docs.any { it.id() == doc.id() }) error("doc is existed, use set to modify")
         docs.add(doc)
-        worker.save()
+        listeners.forEach {
+            it.onChanged(doc, Change.Added)
+        }
+        persistence.save()
     }
 
     fun set(id: Id, fn: (Doc) -> Doc) {
@@ -37,47 +52,29 @@ open class DefaultBase(val worker: Persistence = DoNothingPersistence) : Base {
         val old = this.docs[index]
         val new = fn(old)
         this.docs[index] = new
-        worker.save()
+        listeners.forEach {
+            it.onChanged(new, Change.Changed)
+        }
+        persistence.save()
     }
 
     fun postOrSet(doc: Doc) {
         val index = this.docs.indexOfFirst { it.id() == doc.id() }
         if (index == -1) {
             docs.add(doc)
+            listeners.forEach {
+                it.onChanged(doc, Change.Added)
+            }
         } else {
             docs[index] = doc
-        }
-        worker.save()
-    }
-}
-
-class DependsBase(worker: Persistence = DoNothingPersistence) : DefaultBase(worker) {
-
-
-    fun update(id: Id) {
-        val doc = this.docs.find { it.id() == id } ?: error("no id find")
-        require(doc is DependsDoc) {
-            "doc is not DependsDoc"
-        }
-        if (doc.declare == null) return
-        val newDepends = doc.declare.let {
-            this.select(it.selector)
-        }
-        doc.lock = DependsLock(doc.getHash(), newDepends.map { Depend(it.id(), it.getHash()) })
-        worker.save()
-    }
-
-    fun checkDependOutDated(): List<Pair<Doc, DependSatisfied>> {
-        return this.docs.mapNotNull {
-            if (it !is DependsDoc) return@mapNotNull null
-            val satisfied = it.checkDependSatisfied(this)
-            if (satisfied is DependSatisfied.UnsatisfiedDiffs || satisfied is DependSatisfied.Unsatisfied) {
-                it to satisfied
-            } else {
-                null
+            listeners.forEach {
+                it.onChanged(doc, Change.Changed)
             }
         }
+        persistence.save()
     }
 }
+
+
 
 

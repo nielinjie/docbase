@@ -1,18 +1,20 @@
 package xyz.nietongxue.docbase
 
-fun ReferringDoc.lines():List<String>{
-    TODO()
-}
-fun ReferringDoc.text():String{
-    TODO()
-}
-fun ReferringDoc.paragraphs():List<String>{
-    TODO()
-}
-fun ReferringDoc.pages():List<String>{
-    TODO()
+import xyz.nietongxue.common.base.Path
+import xyz.nietongxue.docbase.filetypes.Md
+import xyz.nietongxue.docbase.filetypes.Pdf
+import xyz.nietongxue.docbase.filetypes.Word
+
+val fileTypes: List<FileType> = listOf(Md(), Pdf(), Word())
+
+
+interface FileType {
+    fun forPath(path: Path): Boolean
+    fun segment(path: String, segmentMethod: SegmentMethod, source: Importer): List<Segment>
 }
 
-fun ReferringDoc.chapters():List<String>{
-    TODO()
+ fun ReferringDoc.segment(segmentMethod: SegmentMethod, source: Importer): List<Segment> {
+    val name = Path.fromString(this.referring.refPath)
+    val fileType = fileTypes.firstOrNull { it.forPath(name) } ?: error("No file type for $name")
+    return fileType.segment(this.referring.refPath, segmentMethod, source)
 }

@@ -17,7 +17,7 @@ class FileSourceTest : StringSpec({
     }
     "file source" {
         val dir = File(baseDir, "fileSourceTest")
-        val source = FileSystemSource(dir)
+        val source = FileSystemImporter(dir)
         val docs = source.refDocs()
         docs.size shouldBe 2
         docs.first().also {
@@ -31,9 +31,9 @@ class FileSourceTest : StringSpec({
         }
     }
     "base update" {
-        val base = DefaultBase()
+        val base = testingBase()
         val dir = File(baseDir, "fileSourceTest")
-        val source = FileSystemSource(dir)
+        val source = FileSystemImporter(dir)
         source.updateBase(base)
         (base.docs shouldHaveSize 2).also {
             it.first().also {
@@ -48,9 +48,9 @@ class FileSourceTest : StringSpec({
         }
     }
     "base update with same file" {
-        val base = DefaultBase()
+        val base = testingBase()
         val dir = File(baseDir, "fileSourceTest")
-        val source = FileSystemSource(dir)
+        val source = FileSystemImporter(dir)
         source.updateBase(base)
         source.updateBase(base)
         (base.docs shouldHaveSize 2).also {
@@ -66,9 +66,9 @@ class FileSourceTest : StringSpec({
         }
     }
     "base update with different file" {
-        val base = DefaultBase()
+        val base = testingBase()
         val dir = File(baseDir, "fileSourceTest")
-        val source = FileSystemSource(dir)
+        val source = FileSystemImporter(dir)
         source.updateBase(base)
         val oldContent = File(dir, "a.txt").readText()
         File(dir, "a.txt").writeText("new content")
@@ -87,9 +87,9 @@ class FileSourceTest : StringSpec({
         File(dir, "a.txt").writeText(oldContent)
     }
     "base update with new file" {
-        val base = DefaultBase()
+        val base = testingBase()
         val dir = File(baseDir, "fileSourceTest")
-        val source = FileSystemSource(dir)
+        val source = FileSystemImporter(dir)
         source.updateBase(base)
         File(dir, "b.txt").writeText("new content")
         source.updateBase(base)

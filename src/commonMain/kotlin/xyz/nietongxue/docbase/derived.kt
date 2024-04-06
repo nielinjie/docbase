@@ -11,15 +11,12 @@ import xyz.nietongxue.docbase.SerializerM.j
 
 @Serializable
 data class Derived(
-    val type: String,
-    val params: Map<String, String>,
-    val origins: List<Id>
+    val type: String, val params: Map<String, String>, val origins: List<Id>
 )
 
 @Serializable
 data class Deriving(
-    val type: String,
-    val params: Map<String, String>
+    val type: String, val params: Map<String, String>
 )
 
 @Serializable
@@ -46,23 +43,21 @@ fun derivedDoc(content: String, doc: Doc, deriving: Deriving): DerivedDoc {
     }
 
     return DerivedDoc(
-        deriving.toDocName(doc.name),
-        content,
-        doc.attrs,
-        Derived(deriving.type, deriving.params, listOf(doc.id()))
+        deriving.toDocName(doc.name), content, doc.attrs, Derived(deriving.type, deriving.params, listOf(doc.id()))
     )
 
 }
 
 
-// pureText content
-fun pureTextDoc(ref: ReferringDoc): Doc {
-    return derivedDoc(ref.text(), ref, Deriving("pureText", mapOf()))
-}
-
 // segmentsText content
-fun segmentDoc(ref: ReferringDoc, segmentMethod: SegmentMethod): List<DerivedDoc> {
-    return segmentMethod.segment(ref).map {
-        derivedDoc(it.first, ref, it.second)
+//TODO 目前只考虑文本内容
+fun segmentDoc(ref: ReferringDoc, segmentMethod: SegmentMethod, source: Importer): List<DerivedDoc> {
+    return segmentMethod.segment(ref, source).map {
+        derivedDoc(it.first.let {
+            when (it) {
+                is Segment.StringSegment -> it.content
+                else -> error("not support yet")
+            }
+        }, ref, it.second)
     }
 }

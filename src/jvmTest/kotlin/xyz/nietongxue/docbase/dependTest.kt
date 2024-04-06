@@ -32,7 +32,7 @@ class DependTest : StringSpec({
         )
     }
     "check dep" {
-        val base = DependsBase()
+        val base = testingDependBase()
         base.post(DependsDoc("name", "content", mapOf(Phase.value("require"))))
         val doc = DependsDoc(
             "name2",
@@ -49,7 +49,7 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 0
     }
     "add file" {
-        val base = DependsBase()
+        val base = testingDependBase()
         base.post(DependsDoc("name", "content", mapOf(Phase.value("require"))))
         val doc = DependsDoc(
             "name2",
@@ -80,7 +80,7 @@ class DependTest : StringSpec({
         }//name2 和 name3 都是依赖于 name，都是outofdate。
     }
     "add depend file" {
-        val base = DependsBase()
+        val base = testingDependBase()
         val docName = DependsDoc("name", "content", mapOf(Phase.value("require")))
         base.post(docName)
         val doc = DependsDoc(
@@ -112,7 +112,7 @@ class DependTest : StringSpec({
         }
     }
     "change depended" {
-        val base = DependsBase()
+        val base = testingDependBase()
         val doc1 = DependsDoc("name", "content", mapOf(Phase.value("require")))
         base.post(doc1)
         val doc2 = DependsDoc(
@@ -144,7 +144,7 @@ class DependTest : StringSpec({
         base.checkDependOutDated() shouldHaveSize 0
     }
     "change itself" {
-        val base = DependsBase()
+        val base = testingDependBase()
         val doc1 = DependsDoc("name", "content", mapOf(Phase.value("require")))
         base.post(doc1)
         val doc2 = DependsDoc(

@@ -12,9 +12,10 @@ import kotlinx.serialization.modules.subclass
 import xyz.nietongxue.dev.Phase
 
 
+
 class BaseTest : StringSpec({
     "basic" {
-        val base = DefaultBase()
+        val base = testingBase()
         base.post(SimpleDoc("name", "content"))
         base.select(docSelector(Phase.matcher("le", "require"))).size shouldBe 0
         base.post(SimpleDoc("name2", "content", mapOf(Phase.value("require"))))
@@ -24,7 +25,7 @@ class BaseTest : StringSpec({
     "select" {
         val doc = SimpleDoc("name", "content", mapOf(Phase.value("require")))
         val selector = docSelector(Phase.matcher("le", "require"))
-        val base = DefaultBase()
+        val base = testingBase()
         base.post(doc)
         base.select(selector).shouldHaveSize(1).also {
             it.first().id().shouldBe(doc.id())

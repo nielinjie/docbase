@@ -14,15 +14,19 @@ fun listAllFiles(dir: File): List<File> {
 }
 
 
-class FileSystemSource(val basePath: File) : ExternalSource {
-    val sourceInfo = "fileSystemSource://$basePath"
+class FileSystemImporter(val basePath: File) : Importer {
+
+    override val sourceInfo = "fileSystemSource://$basePath"
+    override fun raw(path:String): ByteArray {
+        return File(basePath, path).readBytes()
+    }
     fun refDocs(): List<ReferringDoc> {
         return listAllFiles(this.basePath).map {
             refDoc(it.relativeTo(basePath), basePath, sourceInfo)
         }
     }
 
-    fun updateBase(docBase: DefaultBase) {
+    override fun updateBase(docBase: DefaultBase) {
         val refDocs = refDocs()
         refDocs.forEach {
             //id不存在，就是新的path/name文件。更新。

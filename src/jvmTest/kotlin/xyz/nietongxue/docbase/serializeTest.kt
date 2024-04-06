@@ -27,7 +27,7 @@ class SerializeTest : StringSpec(
             }
         })
         "serialize" {
-            val base = DefaultBase()
+            val base = testingBase()
             base.post(DependsDoc("name", "content", mapOf(Phase.value("require"))))
             val json = j().encodeToString(base.docs)
             json.shouldContainInOrder("phase", "require")

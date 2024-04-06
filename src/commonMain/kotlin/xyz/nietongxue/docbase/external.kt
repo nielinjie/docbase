@@ -1,7 +1,7 @@
 package xyz.nietongxue.docbase
 
-interface ExternalSource{
-
+interface Importer : Source{
+    fun raw(path: String):ByteArray
 }
 
 
