@@ -22,8 +22,9 @@ interface HasDepends {
 
 }
 
-class DependsBase(worker: Persistence, listeners: MutableList<DocListener>,
-                  baseListeners: MutableList<BaseListener>) : DefaultBase(worker, listeners,baseListeners) {
+class DependsBase(
+    worker: Persistence, listeners: List<Listener>,
+) : DefaultBase(worker, listeners) {
 
 
     fun update(id: Id) {
@@ -36,8 +37,8 @@ class DependsBase(worker: Persistence, listeners: MutableList<DocListener>,
             this.select(it.selector)
         }
         doc.lock = DependsLock(doc.getHash(), newDepends.map { Depend(it.id(), it.getHash()) })
-        listeners.forEach {
-            it.onChanged(doc, Change.Changed)
+        docListeners.forEach {
+            it.onChanged(DocChangeEvent(doc, Change.Changed))
         }
         persistence.save()
     }

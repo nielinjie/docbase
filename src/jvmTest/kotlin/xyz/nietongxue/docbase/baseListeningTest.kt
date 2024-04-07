@@ -9,18 +9,17 @@ import xyz.nietongxue.common.base.Change
 import java.io.File
 
 fun listeningBase(docListener: DocListener): DefaultBase {
-    val base = DefaultBase(DoNothingPersistence, mutableListOf(docListener), mutableListOf())
+    val base = DefaultBase(DoNothingPersistence,listOf(docListener))
     return base
 }
 
 
-data class Event(val doc: Doc, val change: Change)
 class BaseListeningTest : StringSpec({
     "simple" {
-        val events = mutableListOf<Event>()
+        val events = mutableListOf<DocChangeEvent>()
         val base = listeningBase(object : DocListener {
-            override fun onChanged(doc: Doc, change: Change) {
-                events.add(Event(doc, change))
+            override fun onChanged(docChangeEvent: DocChangeEvent) {
+                events.add(docChangeEvent)
             }
         })
         base.post(SimpleDoc("name", "content"))
@@ -42,7 +41,7 @@ class BaseListeningTest : StringSpec({
     }
     "base" {
         val baseEvents = mutableListOf<String>()
-        val base = DefaultBase(DoNothingPersistence, mutableListOf(), mutableListOf(object : BaseListener {
+        val base = DefaultBase(DoNothingPersistence, listOf(object : BaseListener {
             override fun onOpen(base: Base) {
                 baseEvents.add("open")
             }
@@ -53,16 +52,16 @@ class BaseListeningTest : StringSpec({
         }
     }
     "importer" {
-        val events = mutableListOf<Event>()
+        val events = mutableListOf<DocChangeEvent>()
         val file = File(
             baseDir,
             "fileSourceTest"
         )
-        val base = DefaultBase(DoNothingPersistence, mutableListOf(object : DocListener {
-            override fun onChanged(doc: Doc, change: Change) {
-                events.add(Event(doc, change))
+        val base = DefaultBase(DoNothingPersistence, listOf(object : DocListener {
+            override fun onChanged(docChangeEvent: DocChangeEvent) {
+                events.add(docChangeEvent)
             }
-        }), mutableListOf(FileSystemImporter(file)))
+        }, FileSystemImporter(file)))
 
         events.shouldHaveSize(2).also {
             it.first().also {

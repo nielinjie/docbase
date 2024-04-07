@@ -3,7 +3,7 @@ package xyz.nietongxue.docbase
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import xyz.nietongxue.common.base.*
-import xyz.nietongxue.common.base.Serializing.j
+import xyz.nietongxue.common.base.j
 
 interface Doc : WithHash {
     fun id(): Id{

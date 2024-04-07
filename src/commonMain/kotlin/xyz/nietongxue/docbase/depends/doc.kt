@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import xyz.nietongxue.common.base.Attrs
-import xyz.nietongxue.common.base.Serializing
 import xyz.nietongxue.common.base.diff
+import xyz.nietongxue.common.base.j
 import xyz.nietongxue.docbase.Doc
 
 
@@ -19,7 +19,7 @@ data class DependsDoc(
 
 
     override fun hashProps(): List<Pair<String, JsonElement>> {
-        return super.hashProps() + ("declares" to Serializing.j().encodeToJsonElement(declare))
+        return super.hashProps() + ("declares" to j().encodeToJsonElement(declare))
     }
 
 

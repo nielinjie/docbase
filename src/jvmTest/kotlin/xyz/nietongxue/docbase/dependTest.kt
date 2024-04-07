@@ -8,13 +8,14 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import xyz.nietongxue.common.base.Serializing
+import xyz.nietongxue.common.base.globalSerializing
 import xyz.nietongxue.dev.Phase
 import xyz.nietongxue.docbase.depends.DependSatisfied
 import xyz.nietongxue.docbase.depends.DependsDoc
 import xyz.nietongxue.docbase.depends.declareDepend
 
 class DependTest : StringSpec({
-    Serializing.plus(SerializersModule {
+    globalSerializing.plus(SerializersModule {
         polymorphic(Matcher::class) {
             subclass(DimensionMatcher::class)
         }

@@ -5,23 +5,42 @@ import xyz.nietongxue.common.base.Change
 
 interface Base
 
+interface Listener
 
 
-interface DocListener {
-    fun onChanged(doc: Doc, change: Change)
+data class DocChangeEvent(val doc: Doc, val change: Change)
+interface BaseAware {
+    fun setBase(base: Base)
 }
-interface BaseListener {
+
+interface DocListener : Listener {
+    fun onChanged(docChangeEvent: DocChangeEvent)
+}
+
+interface BaseListener : Listener {
     fun onOpen(base: Base)
 }
 
 open class DefaultBase(
     val persistence: Persistence,
-    val listeners: MutableList<DocListener>,
-    val baseListeners: MutableList<BaseListener>
+    val listeners: List<Listener>,
 ) : Base {
     val docs = mutableListOf<Doc>()
+    val docListeners = mutableListOf<DocListener>()
+    val baseListeners = mutableListOf<BaseListener>()
 
     init {
+        listeners.filterIsInstance<BaseAware>().forEach {
+            it.setBase(this)
+        }
+        baseListeners.also {
+            it.clear()
+            it.addAll(listeners.filterIsInstance<BaseListener>())
+        }
+        docListeners.also {
+            it.clear()
+            it.addAll(listeners.filterIsInstance<DocListener>())
+        }
         persistence.setBase(this)
         persistence.load()
         baseListeners.forEach { it.onOpen(this) }
@@ -42,8 +61,8 @@ open class DefaultBase(
     fun post(doc: Doc) {
         if (this.docs.any { it.id() == doc.id() }) error("doc is existed, use set to modify")
         docs.add(doc)
-        listeners.forEach {
-            it.onChanged(doc, Change.Added)
+        docListeners.forEach {
+            it.onChanged(DocChangeEvent(doc, Change.Added))
         }
         persistence.save()
     }
@@ -54,8 +73,8 @@ open class DefaultBase(
         val old = this.docs[index]
         val new = fn(old)
         this.docs[index] = new
-        listeners.forEach {
-            it.onChanged(new, Change.Changed)
+        docListeners.forEach {
+            it.onChanged(DocChangeEvent(new, Change.Changed))
         }
         persistence.save()
     }
@@ -64,14 +83,26 @@ open class DefaultBase(
         val index = this.docs.indexOfFirst { it.id() == doc.id() }
         if (index == -1) {
             docs.add(doc)
-            listeners.forEach {
-                it.onChanged(doc, Change.Added)
+            docListeners.forEach {
+                it.onChanged(DocChangeEvent(doc, Change.Added))
             }
         } else {
             docs[index] = doc
-            listeners.forEach {
-                it.onChanged(doc, Change.Changed)
+            docListeners.forEach {
+                it.onChanged(DocChangeEvent(doc, Change.Changed))
             }
+        }
+        persistence.save()
+    }
+
+    //TODO 需要是逻辑删除不？
+    fun delete(id: Id) {
+        val index = this.docs.indexOfFirst { it.id() == id }
+        if (index == -1) error("not found")
+        val doc = this.docs[index]
+        this.docs.removeAt(index)
+        docListeners.forEach {
+            it.onChanged(DocChangeEvent(doc, Change.Removed))
         }
         persistence.save()
     }

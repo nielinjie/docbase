@@ -45,6 +45,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("com.benasher44:uuid:0.7.0")
+                implementation("io.arrow-kt:arrow-core:1.2.0")
                 implementation("xyz.nietongxue:common:1.0-SNAPSHOT")
 
 

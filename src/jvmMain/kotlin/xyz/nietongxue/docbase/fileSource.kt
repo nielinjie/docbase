@@ -17,9 +17,10 @@ fun listAllFiles(dir: File): List<File> {
 class FileSystemImporter(val basePath: File) : Importer {
 
     override val sourceInfo = "fileSystemSource:$basePath"
-    override fun raw(path:String): ByteArray {
+    override fun raw(path: String): ByteArray {
         return File(basePath, path).readBytes()
     }
+
     fun refDocs(): List<ReferringDoc> {
         return listAllFiles(this.basePath).map {
             refDoc(it.relativeTo(basePath), basePath, sourceInfo)
@@ -29,6 +30,7 @@ class FileSystemImporter(val basePath: File) : Importer {
     override fun onOpen(base: Base) {
         updateBase(base as DefaultBase)
     }
+
     override fun updateBase(docBase: DefaultBase) {
         val refDocs = refDocs()
         refDocs.forEach {
@@ -51,8 +53,17 @@ class FileSystemImporter(val basePath: File) : Importer {
             } else {
                 docBase.post(it)
             }
-            //TODO 实现同步，对于已经删除的文件，需要删除对应的doc
         }
+        //TODO 实现同步，对于已经删除的文件，需要删除对应的doc
+
+        docBase.docs.filterIsInstance<ReferringDoc>().filter { it.referring.sourceInfo == this.sourceInfo }
+            .forEach { fromBase ->
+                if (refDocs.none { fromFile ->
+                        fromBase.id() == fromFile.id()
+                    }) {
+                    docBase.delete(fromBase.id())
+                }
+            }
     }
 }
 

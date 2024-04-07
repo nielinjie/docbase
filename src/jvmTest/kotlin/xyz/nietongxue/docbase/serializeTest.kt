@@ -9,7 +9,8 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import xyz.nietongxue.common.base.Serializing
-import xyz.nietongxue.common.base.Serializing.j
+import xyz.nietongxue.common.base.globalSerializing
+import xyz.nietongxue.common.base.j
 import xyz.nietongxue.dev.Phase
 import xyz.nietongxue.docbase.depends.DependsDoc
 import xyz.nietongxue.docbase.depends.declareDepend
@@ -17,7 +18,7 @@ import xyz.nietongxue.docbase.depends.declareDepend
 
 class SerializeTest : StringSpec(
     {
-        Serializing.plus(SerializersModule {
+        globalSerializing.plus(SerializersModule {
             polymorphic(Doc::class) {
                 subclass(SimpleDoc::class)
                 subclass(DependsDoc::class)
